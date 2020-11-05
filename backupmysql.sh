@@ -57,7 +57,9 @@ if [[ "${ACTION}" == "restore" ]]; then
 	RESTORE_FILE=${RESTORE_FILE:0:${#RESTORE_FILE}-3}
     fi
 
-    mysql -h ${MYSQL_HOST} -u ${MYSQL_USERNAME} -p${MYSQL_PASSWORD} < ${RESTORE_FILE}
+    CMD="mysql -h ${MYSQL_HOST} -u ${MYSQL_USERNAME} -p${MYSQL_PASSWORD} < ${RESTORE_FILE}"
+    echo $CMD
+    ${CMD}
     exit
 fi
 
