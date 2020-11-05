@@ -83,6 +83,7 @@ MYSQL_FLAGS="${MYSQL_FLAGS} $ADDITIONAL_MYSQL_FLAGS"
 
 
 CMD="mysqldump $MYSQL_FLAGS -h $MYSQL_HOST -u $MYSQL_USERNAME -p$MYSQL_PASSWORD --result-file=${FILENAME}"
+echo $CMD
 $CMD
 
 if [[ ${COMPRESS_BAKCUP} -eq "true" ]]; then
