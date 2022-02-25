@@ -1,13 +1,24 @@
 #!/bin/bash
 
 # ENV Variables
-# BACKUP_S3 = true/false (DEFAULT OPTION if nothing is given)
+# BACKUP_S3 = true/false (default: false)
 # BACKUP_S3_BUCKET
 # AWS_ASSUME_ARN
-# AWS
+# AWS_REGION  (default: us-east-1)
+# 
+# ACTION = backup | restore (default: backup)
+# MYSQL_FLAGS = <flags for mysqldump> (default: --add-drop-database)
+# RESTORE_FILE = file to restore if action=restore
+# MYSQL_HOST
+# MYSQL_USERNAME
+# MYSQL_PASSWORD
+# MYSQL_DATABASES
 
-MYSQL_FLAGS="--add-drop-database "
+
+MYSQL_FLAGS=${MYSQL_FLAGS:-"--add-drop-database "}
 ACTION=${PERFORM_ACTION:-backup}
+export AWS_REGION=${AWS_REGION:-"us-east-1"}
+
 
 if [[ "${ACTION}" == "list" ]]; then
     if [[ ! -z "${AWS_ASSUME_ARN}" ]]; then
@@ -16,7 +27,6 @@ if [[ "${ACTION}" == "list" ]]; then
 	export AWS_SECRET_ACCESS_KEY=$(echo $session | jq -r .Credentials.SecretAccessKey)
 	export AWS_SESSION_TOKEN=$(echo $session | jq -r .Credentials.SessionToken)
 	export AWS_DEFAULT_REGION=us-east-1
-	export AWS_REGION=us-east-1
     fi
 
     if [[ -z ${BACKUP_S3_BUCKET} ]]; then
@@ -36,7 +46,6 @@ if [[ "${ACTION}" == "restore" ]]; then
 	export AWS_SECRET_ACCESS_KEY=$(echo $session | jq -r .Credentials.SecretAccessKey)
 	export AWS_SESSION_TOKEN=$(echo $session | jq -r .Credentials.SessionToken)
 	export AWS_DEFAULT_REGION=us-east-1
-	export AWS_REGION=us-east-1
     fi
 
     if [[ -z ${RESTORE_FILE} ]]; then
@@ -102,7 +111,7 @@ if [[ ! -z "${AWS_ASSUME_ARN}" ]]; then
     export AWS_SECRET_ACCESS_KEY=$(echo $session | jq -r .Credentials.SecretAccessKey)
     export AWS_SESSION_TOKEN=$(echo $session | jq -r .Credentials.SessionToken)
     export AWS_DEFAULT_REGION=us-east-1
-    export AWS_REGION=us-east-1
+
 fi
 
 aws s3 cp $FILENAME s3://${BACKUP_S3_BUCKET}/${FILENAME}
