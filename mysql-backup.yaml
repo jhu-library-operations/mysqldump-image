@@ -1,0 +1,64 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  annotations:
+  name: backup
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - env:
+            - name: AWS_ASSUME_ARN
+              valueFrom:
+                configMapKeyRef:
+                  key: role_arn
+                  name: backup
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: access_key_id
+                  name: backup
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: secret_access_key
+                  name: backup
+            - name: BACKUP_S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  key: s3_bucket
+                  name: backup
+            - name: MYSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: host
+                  name: backup
+            - name: MYSQL_USERNAME
+              value: root
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: root_pass
+                  name: mysql
+            - name: ACTION
+              value: backup
+            image: ghcr.io/jhu-library-operations/mysqldump/mysqldump:latest
+            imagePullPolicy: Always
+            name: mysqldump
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+  schedule: 0 */12 * * *
+  successfulJobsHistoryLimit: 2
+  suspend: false
